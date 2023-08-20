@@ -1,7 +1,7 @@
 # Omron F430 and F440 Vision Sensor
 
 ```python
-import f4_tcp_serial
+from omron import f4_tcp_serial
 
 
 if __name__ == '__main__':
