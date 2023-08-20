@@ -22,8 +22,7 @@ class F4TCPSerial:
     def close(self):
         self.socket.close()
 
-    def get_image(self, file_name: str):
-        command = bytes('GETIMAGE\r', 'utf-8')
+    def send_command(self, command: bytes) -> bytes:
         self.socket.sendall(command)
         while True:
             try:
@@ -43,8 +42,18 @@ class F4TCPSerial:
                 else:
                     print(e)
                     break
+        return self.data_buffer
 
+    def get_image(self, file_name: str):
+        command = bytes('GETIMAGE\r', 'utf-8')
+        response = self.send_command(command)
         with open(file_name, "wb") as binary_file:
-            binary_file.write(self.data_buffer)
+            binary_file.write(response)
+
+    def trigger_inspection(self):
+        command = bytes('TRIGGER\r', 'utf-8')
+        response = self.send_command(command)
+        return response
+
 
 
