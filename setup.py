@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="omron",
-    version="0.1.2",
+    version="0.1.3",
     author="Joseph Ryan",
     author_email="jr@aphyt.com",
     description="A library to communicate with Omron devices",
