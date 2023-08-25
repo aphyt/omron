@@ -38,6 +38,10 @@ class F4TCPSerial:
                 data = self.socket.recv(1024)
                 data_buffer += data
                 attempts = 0
+                # ToDo move to another method. ETX only terminates on results that are not multi-message
+                # if data[-1] == 3:
+                #     # The ETX is UTF-8 3 and indicates the message has completed
+                #     break
                 if not data:
                     self.socket.close()
                     break
