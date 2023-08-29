@@ -142,46 +142,64 @@ class F4TCPSerial:
         """Get the Boolean stored in the camera at the specified attribute number"""
         assert number >= 1
         assert number <= 200
-        pass
+        response = False
+        if self.get(f'bool{number}') == '1':
+            response = True
+        return response
 
     def set_bool(self, number: int, value: bool):
         """Set the Boolean stored in the camera at the specified attribute number"""
         assert number >= 1
         assert number <= 200
-        pass
+        if value:
+            self.set(f'bool{number}', '1')
+        else:
+            self.set(f'bool{number}', '0')
 
     def get_int(self, number: int):
         """Get the 16-bit Integer stored in the camera at the specified attribute number"""
         assert number >= 1
         assert number <= 200
-        pass
+        response = self.get(f'int{number}')
+        response = int(response)
+        return response
 
     def set_int(self, number: int, value: int):
         """Set the 16-bit Integer stored in the camera at the specified attribute number"""
         assert number >= 1
         assert number <= 200
-        pass
+        value = str(value)
+        response = self.set(f'int{number}', value)
+        return response
 
     def get_long(self, number: int):
         """Get the 32-bit Integer stored in the camera at the specified attribute number"""
         assert number >= 1
         assert number <= 200
-        pass
+        response = self.get(f'long{number}')
+        response = int(response)
+        return response
 
     def set_long(self, number: int, value: int):
         """Set the 32-bit Integer stored in the camera at the specified attribute number"""
         assert number >= 1
         assert number <= 200
-        pass
+        value = str(value)
+        response = self.set(f'long{number}', value)
+        return response
 
-    def get_float(self, number: int):
+    def get_float(self, number: float):
         """Get the Floating Point stored in the camera at the specified attribute number"""
         assert number >= 1
         assert number <= 200
-        pass
+        response = self.get(f'float{number}')
+        response = float(response)
+        return response
 
     def set_float(self, number: int, value: float):
         """Set the Floating Point stored in the camera at the specified attribute number"""
         assert number >= 1
         assert number <= 200
-        pass
+        value = str(value)
+        response = self.set(f'float{number}', value)
+        return response
