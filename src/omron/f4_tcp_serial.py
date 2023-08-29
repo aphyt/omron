@@ -38,10 +38,6 @@ class F4TCPSerial:
                 data = self.socket.recv(1024)
                 data_buffer += data
                 attempts = 0
-                # ToDo move to another method. ETX only terminates on results that are not multi-message
-                # if data[-1] == 3:
-                #     # The ETX is UTF-8 3 and indicates the message has completed
-                #     break
                 if not data:
                     self.socket.close()
                     break
@@ -115,6 +111,8 @@ class F4TCPSerial:
         command_string += f' {area}'
         command = bytes(command_string + '\r', 'utf-8')
         response = self.send_command(command)
+        response = response.decode('utf-8').rstrip('\3')
+        response = response.rstrip()
         return response
 
     def set(self, area: str, data: str):
@@ -122,4 +120,68 @@ class F4TCPSerial:
         command_string += f' {area} {data}'
         command = bytes(command_string + '\r', 'utf-8')
         response = self.send_command(command)
+        response = response.decode('utf-8').rstrip('\3')
+        response = response.rstrip()
         return response
+
+    def get_string(self, number: int):
+        """Get the string stored in the camera at the specified attribute number"""
+        assert number >= 1
+        assert number <= 200
+        response = self.get(f'string{number}')
+        return response
+
+    def set_string(self, number: int, value: str):
+        """Set the string stored in the camera at the specified attribute number"""
+        assert number >= 1
+        assert number <= 200
+        response = self.set(f'string{number}', value)
+        return response
+
+    def get_bool(self, number: int):
+        """Get the Boolean stored in the camera at the specified attribute number"""
+        assert number >= 1
+        assert number <= 200
+        pass
+
+    def set_bool(self, number: int, value: bool):
+        """Set the Boolean stored in the camera at the specified attribute number"""
+        assert number >= 1
+        assert number <= 200
+        pass
+
+    def get_int(self, number: int):
+        """Get the 16-bit Integer stored in the camera at the specified attribute number"""
+        assert number >= 1
+        assert number <= 200
+        pass
+
+    def set_int(self, number: int, value: int):
+        """Set the 16-bit Integer stored in the camera at the specified attribute number"""
+        assert number >= 1
+        assert number <= 200
+        pass
+
+    def get_long(self, number: int):
+        """Get the 32-bit Integer stored in the camera at the specified attribute number"""
+        assert number >= 1
+        assert number <= 200
+        pass
+
+    def set_long(self, number: int, value: int):
+        """Set the 32-bit Integer stored in the camera at the specified attribute number"""
+        assert number >= 1
+        assert number <= 200
+        pass
+
+    def get_float(self, number: int):
+        """Get the Floating Point stored in the camera at the specified attribute number"""
+        assert number >= 1
+        assert number <= 200
+        pass
+
+    def set_float(self, number: int, value: float):
+        """Set the Floating Point stored in the camera at the specified attribute number"""
+        assert number >= 1
+        assert number <= 200
+        pass
