@@ -124,6 +124,36 @@ class F4TCPSerial:
         response = response.rstrip()
         return response
 
+    def help(self):
+        command_string = 'HELP'
+        command = bytes(command_string + '\r', 'utf-8')
+        response = self.send_command(command)
+        response = response.decode('utf-8').rstrip('\3')
+        response = response.rstrip()
+        return response
+
+    def info(self, data: str = None):
+        command_string = 'INFO'
+        if data:
+            command_string += f' {data}'
+        command = bytes(command_string + '\r', 'utf-8')
+        response = self.send_command(command)
+        response = response.decode('utf-8').rstrip('\3')
+        response = response.split('\r\n')
+        return response
+
+    def get_info_tree(self, start='', indent=''):
+        current_value = start
+        values = self.info(start)
+        for value in values:
+            if value != '':
+                output = indent + value
+                print(output)
+                next_indent = '  ' + indent
+                if current_value != '':
+                    value = current_value + '.' + value
+                self.get_info_tree(value, next_indent)
+
     def get_string(self, number: int):
         """Get the string stored in the camera at the specified attribute number"""
         assert number >= 1
@@ -202,4 +232,14 @@ class F4TCPSerial:
         assert number <= 200
         value = str(value)
         response = self.set(f'float{number}', value)
+        return response
+
+    def job_info(self, data: str = None):
+        command_string = 'JOBINFO'
+        if data:
+            command_string += f' {data}'
+        command = bytes(command_string + '\r', 'utf-8')
+        response = self.send_command(command)
+        response = response.decode('utf-8').rstrip('\3')
+        response = response.rstrip()
         return response
