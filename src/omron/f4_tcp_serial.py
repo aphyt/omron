@@ -142,7 +142,7 @@ class F4TCPSerial:
         response = response.split('\r\n')
         return response
 
-    def get_info_tree(self, start='', indent=''):
+    def print_info_tree(self, start='', indent=''):
         current_value = start
         values = self.info(start)
         for value in values:
@@ -152,7 +152,7 @@ class F4TCPSerial:
                 next_indent = '  ' + indent
                 if current_value != '':
                     value = current_value + '.' + value
-                self.get_info_tree(value, next_indent)
+                self.print_info_tree(value, next_indent)
 
     def get_string(self, number: int):
         """Get the string stored in the camera at the specified attribute number"""
