@@ -4,10 +4,12 @@ __maintainer__ = "Joseph Ryan"
 __email__ = "jr@aphyt.com"
 
 import asyncio
+import ftplib
 import socket
 import errno
 import time
 import select
+from ftplib import FTP
 
 
 class ImageRectangle:
@@ -21,6 +23,7 @@ class ImageRectangle:
 class F4TCPSerial:
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.camera_name = None
 
     def connect(self, host: str, port: int = 49211):
         self.socket.connect((host, port))
@@ -28,6 +31,10 @@ class F4TCPSerial:
 
     def close(self):
         self.socket.close()
+
+    def get_camera_name(self):
+        self.camera_name = self.get('system.name')
+        return self.camera_name
 
     def send_command_long_response(self, command: bytes) -> bytes:
         attempts = 0
@@ -234,6 +241,14 @@ class F4TCPSerial:
         response = self.set(f'float{number}', value)
         return response
 
+    def job_save(self, slot_number: int = None):
+        command_string = f'JOBSAVE -slot={str(slot_number)}'
+        command = bytes(command_string + '\r', 'utf-8')
+        response = self.send_command(command)
+        response = response.decode('utf-8').rstrip('\3')
+        response = response.rstrip()
+        return response
+
     def job_info(self, data: str = None):
         command_string = 'JOBINFO'
         if data:
@@ -243,3 +258,22 @@ class F4TCPSerial:
         response = response.decode('utf-8').rstrip('\3')
         response = response.rstrip()
         return response
+
+    def job_download(self, size_in_bytes: int = None):
+        command_string = 'JOBDOWNLOAD -transfer=ftp'
+        if size_in_bytes:
+            command_string += f' -size={size_in_bytes}'
+        command = bytes(command_string + '\r', 'utf-8')
+        response = self.send_command(command)
+        response = response.decode('utf-8').rstrip('\3')
+        response = response.rstrip()
+        return response
+
+    def job_download_cancel(self):
+        command_string = 'JOBDOWNLOAD -c'
+        command = bytes(command_string + '\r', 'utf-8')
+        response = self.send_command(command)
+        response = response.decode('utf-8').rstrip('\3')
+        response = response.rstrip()
+        return response
+
