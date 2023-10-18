@@ -279,7 +279,7 @@ class F4TCPSerial:
         return response
 
     def get_used_job_slots(self) -> List[int]:
-        """Method to return the used job slot numbers to find an available save slot"""
+        """Get the used job slot numbers"""
         job_info_response = self.job_info()
         jobs = job_info_response.rsplit('\r\n')
         slots = []
@@ -287,4 +287,16 @@ class F4TCPSerial:
             slot = int(job.rsplit('=')[0][4:])
             slots.append(slot)
         return slots
+
+    def get_next_available_job_slot(self):
+        """Get the next available job slot"""
+        used_slots = self.get_used_job_slots()
+        next_slot = None
+        for index, slot in enumerate(used_slots):
+            if index + 1 == slot:
+                pass
+            else:
+                next_slot = index + 1
+        return next_slot
+
 
