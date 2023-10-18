@@ -290,6 +290,9 @@ class F4TCPSerial:
         response = self.send_command(command)
         response = response.decode('utf-8').rstrip('\3')
         response = response.rstrip()
+        self.go_online()
+        while self.get_online_status() != '!1':
+            time.sleep(.1)
         return response
 
     def job_delete_slot(self, slot_number: int):
@@ -362,26 +365,37 @@ class F4TCPSerial:
                     next_slot = index + 1
         return next_slot
 
-    def transfer_job_from_camera(self, host: str, username: str = 'target', password: str = 'password'):
+    def transfer_running_job_from_camera(self, host: str, username: str = 'target', password: str = 'password'):
         available_slot = self.get_next_available_job_slot()
         current_time = datetime.now()
         current_time = current_time.strftime('%Y-%m-%dT%H-%M-%S')
         common_name = f'{current_time}_{self.get_camera_name()}'
-        save_name = f'{common_name}.avp'
-        ftp_save_name = f'slot{available_slot}_{common_name}'
-
-        # Move job from memory to slot
         self.job_save_as(common_name, available_slot)
+        self.transfer_job_from_camera(available_slot, host, username, password)
+        self.job_delete_slot(available_slot)
+
+    def transfer_job_from_camera(
+            self, slot_number: int, host: str, username: str = 'target', password: str = 'password'):
+        available_slot = self.get_next_available_job_slot()
+        avp_name = self.job_info(str(slot_number)).rsplit('=')[1]
+        ftp_save_name = f'slot{slot_number}_{avp_name}'
         # Create an FTP to retrieve AVP
         ftp_client = FTP(host, username, password)
         # Change to the directory where the saved AVP is stored
         ftp_client.cwd(self.ftp_job_location)
         # Retrieve file to the local machine
-        with open(save_name, 'wb') as fp:
-            ftp_client.retrbinary(f'RETR {ftp_save_name}.avp', fp.write)
+        with open(avp_name, 'wb') as fp:
+            ftp_client.retrbinary(f'RETR {ftp_save_name}', fp.write)
         self.job_delete_slot(available_slot)
 
-    def transfer_job_to_camera(self, job_avp: str):
-        pass
+    def transfer_job_to_camera(self, job_avp: str, slot_number: int,
+                               host: str, username: str = 'target', password: str = 'password'):
+        ftp_save_name = f'slot{slot_number}_{job_avp}'
+        ftp_client = FTP(host, username, password)
+        # Change to the directory where the saved AVP is stored
+        ftp_client.cwd(self.ftp_job_location)
+        # Retrieve file to the local machine
+        with open(job_avp, 'rb') as fp:
+            ftp_client.storbinary(f'STOR {ftp_save_name}', fp)
 
 
