@@ -10,6 +10,7 @@ import errno
 import time
 import select
 from ftplib import FTP
+from typing import List
 
 
 class ImageRectangle:
@@ -276,4 +277,14 @@ class F4TCPSerial:
         response = response.decode('utf-8').rstrip('\3')
         response = response.rstrip()
         return response
+
+    def get_used_job_slots(self) -> List[int]:
+        """Method to return the used job slot numbers to find an available save slot"""
+        job_info_response = self.job_info()
+        jobs = job_info_response.rsplit('\r\n')
+        slots = []
+        for job in jobs:
+            slot = int(job.rsplit('=')[0][4:])
+            slots.append(slot)
+        return slots
 
