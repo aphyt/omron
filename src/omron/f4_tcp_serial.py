@@ -244,6 +244,30 @@ class F4TCPSerial:
         response = self.set(f'float{number}', value)
         return response
 
+    def go_offline(self):
+        command_string = f'OFFLINE'
+        command = bytes(command_string + '\r', 'utf-8')
+        response = self.send_command(command)
+        response = response.decode('utf-8').rstrip('\3')
+        response = response.rstrip()
+        return response
+
+    def go_online(self):
+        command_string = f'ONLINE'
+        command = bytes(command_string + '\r', 'utf-8')
+        response = self.send_command(command)
+        response = response.decode('utf-8').rstrip('\3')
+        response = response.rstrip()
+        return response
+
+    def get_online_status(self):
+        command_string = f'ONLINE?'
+        command = bytes(command_string + '\r', 'utf-8')
+        response = self.send_command(command)
+        response = response.decode('utf-8').rstrip('\3')
+        response = response.rstrip()
+        return response
+
     def job_save(self, slot_number: int = None):
         command_string = f'JOBSAVE -slot={str(slot_number)}'
         command = bytes(command_string + '\r', 'utf-8')
@@ -254,6 +278,14 @@ class F4TCPSerial:
 
     def job_save_as(self, job_name: str, slot_number: int = None):
         command_string = f'JOBSAVEAS -slot={str(slot_number)} -name={job_name}'
+        command = bytes(command_string + '\r', 'utf-8')
+        response = self.send_command(command)
+        response = response.decode('utf-8').rstrip('\3')
+        response = response.rstrip()
+        return response
+
+    def job_load(self, slot_number: int = None):
+        command_string = f'JOBLOAD -slot={str(slot_number)} -r'
         command = bytes(command_string + '\r', 'utf-8')
         response = self.send_command(command)
         response = response.decode('utf-8').rstrip('\3')
@@ -320,23 +352,34 @@ class F4TCPSerial:
         """Get the next available job slot"""
         used_slots = self.get_used_job_slots()
         next_slot = None
-        for index, slot in enumerate(used_slots):
-            if index + 1 == slot:
-                pass
-            else:
-                next_slot = index + 1
+        if used_slots[0] != 1:
+            next_slot = 1
+        else:
+            for index, slot in enumerate(used_slots):
+                if index + 1 == slot:
+                    pass
+                else:
+                    next_slot = index + 1
         return next_slot
 
-    def transfer_job_from_camera(self):
+    def transfer_job_from_camera(self, host: str, username: str = 'target', password: str = 'password'):
         available_slot = self.get_next_available_job_slot()
         current_time = datetime.now()
-        current_time = current_time.strftime('%Y-%m-%dT%H:%M:%S')
-        print(current_time)
-        save_name = f'{current_time}_{self.get_camera_name()}.avp'
-        print(save_name)
+        current_time = current_time.strftime('%Y-%m-%dT%H-%M-%S')
+        common_name = f'{current_time}_{self.get_camera_name()}'
+        save_name = f'{common_name}.avp'
+        ftp_save_name = f'slot{available_slot}_{common_name}'
 
-        # self.job_save_as(save_name, available_slot)
-        job_info = self.job_info(str(available_slot))
+        # Move job from memory to slot
+        self.job_save_as(common_name, available_slot)
+        # Create an FTP to retrieve AVP
+        ftp_client = FTP(host, username, password)
+        # Change to the directory where the saved AVP is stored
+        ftp_client.cwd(self.ftp_job_location)
+        # Retrieve file to the local machine
+        with open(save_name, 'wb') as fp:
+            ftp_client.retrbinary(f'RETR {ftp_save_name}.avp', fp.write)
+        self.job_delete_slot(available_slot)
 
     def transfer_job_to_camera(self, job_avp: str):
         pass
