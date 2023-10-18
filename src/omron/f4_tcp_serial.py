@@ -11,6 +11,7 @@ import time
 import select
 from ftplib import FTP
 from typing import List
+from datetime import datetime
 
 
 class ImageRectangle:
@@ -25,6 +26,7 @@ class F4TCPSerial:
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.camera_name = None
+        self.ftp_job_location = '/sd0:0/Jobs/Job1'
 
     def connect(self, host: str, port: int = 49211):
         self.socket.connect((host, port))
@@ -250,6 +252,32 @@ class F4TCPSerial:
         response = response.rstrip()
         return response
 
+    def job_save_as(self, job_name: str, slot_number: int = None):
+        command_string = f'JOBSAVEAS -slot={str(slot_number)} -name={job_name}'
+        command = bytes(command_string + '\r', 'utf-8')
+        response = self.send_command(command)
+        response = response.decode('utf-8').rstrip('\3')
+        response = response.rstrip()
+        return response
+
+    def job_delete_slot(self, slot_number: int):
+        """Delete job in the specified slot"""
+        command_string = f'JOBDELETE -slot={slot_number}'
+        command = bytes(command_string + '\r', 'utf-8')
+        response = self.send_command(command)
+        response = response.decode('utf-8').rstrip('\3')
+        response = response.rstrip()
+        return response
+
+    def job_delete_all(self):
+        """Delete all job slots"""
+        command_string = f'JOBDELETE -all'
+        command = bytes(command_string + '\r', 'utf-8')
+        response = self.send_command(command)
+        response = response.decode('utf-8').rstrip('\3')
+        response = response.rstrip()
+        return response
+
     def job_info(self, data: str = None):
         command_string = 'JOBINFO'
         if data:
@@ -298,5 +326,19 @@ class F4TCPSerial:
             else:
                 next_slot = index + 1
         return next_slot
+
+    def transfer_job_from_camera(self):
+        available_slot = self.get_next_available_job_slot()
+        current_time = datetime.now()
+        current_time = current_time.strftime('%Y-%m-%dT%H:%M:%S')
+        print(current_time)
+        save_name = f'{current_time}_{self.get_camera_name()}.avp'
+        print(save_name)
+
+        # self.job_save_as(save_name, available_slot)
+        job_info = self.job_info(str(available_slot))
+
+    def transfer_job_to_camera(self, job_avp: str):
+        pass
 
 
