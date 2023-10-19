@@ -1,29 +1,16 @@
 # Omron F430 and F440 Vision Sensor Communications
 
-This is a communications driver for the Omron F4*0 series vision sensors. The driver allows the programmer to exchange data with a target device, as well as interact with the core functionality, over a TCP connection.
+This is a communications driver for the Omron F4*0 series vision sensors. The driver allows the programmer to exchange data with a target device, as well as interact with the core functionality, over a TCP connection. This library can:
 
-## Installation from PyPi
+- Trigger Inspections
+- Transfer Inspection Images to Client PC
+- Get and Set Fieldbus Linked Variables
+- Transfer AVP Files from Job Slot to Client PC
+- Transfer AVP Files to Job Slot from Client PC
+- Save Running Job to Client PC
+- Load a Job from Slot to Running Memory
+- Save Job from Running Memory to a Slot
+- Go On and Offline
+- Retrieve Help and Info from Camera 
 
-`pip install omron`
-
-
-## Upgrade from PyPi
-
-`pip install omron --upgrade`
-
-## Usage
-
-### Get Inspection Image
-
-This code will connect to an F4 camera located at IP Address 192.168.250.15 and transfer the last inspection image to the client PC to be stored as 'file.jpg'.
-
-```python
-from omron import f4_tcp_serial
-
-
-if __name__ == '__main__':
-    f4_instance = f4_tcp_serial.F4TCPSerial()
-    f4_instance.connect('192.168.250.15')
-    f4_instance.get_image('file.jpg')
-    f4_instance.close()
-```
+For installation and usage instructions, please read the [Documentation](docs/README.md)
