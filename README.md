@@ -1,6 +1,8 @@
 # Omron F430 and F440 Vision Sensor Communications
 
-This is a communications driver for the Omron F4*0 series vision sensors. The driver allows the programmer to exchange data with a target device, as well as interact with the core functionality, over a TCP connection. This library can:
+This is a communications driver for the Omron F4*0 series vision sensors. The driver allows the programmer to exchange data with a target device, as well as interact with the core functionality, over a TCP connection. 
+
+## Library Functionality
 
 - Trigger Inspections
 - Transfer Inspection Images to Client PC
@@ -13,4 +15,5 @@ This is a communications driver for the Omron F4*0 series vision sensors. The dr
 - Go On and Offline
 - Retrieve Help and Info from Camera 
 
+## Documentation
 For installation and usage instructions, please read the [Documentation](docs/README.md)
