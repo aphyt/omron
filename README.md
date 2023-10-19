@@ -1,6 +1,8 @@
 # Omron F430 and F440 Vision Sensor Communications
 
-This is a communications driver for the Omron F4*0 series vision sensors. The driver allows the programmer to exchange data with a target device, as well as interact with the core functionality, over a TCP connection. 
+This is a Python communications driver for the Omron F4*0 series vision sensors. The driver allows the programmer to exchange data with a target device, as well as interact with the core functionality, over a TCP connection. 
+
+The package is available on [PyPi](https://pypi.org/project/omron/) for easy installation and upgrade using PIP.
 
 ## Library Functionality
 
@@ -16,4 +18,4 @@ This is a communications driver for the Omron F4*0 series vision sensors. The dr
 - Retrieve Help and Info from Camera 
 
 ## Documentation
-For installation and usage instructions, please read the [Documentation](docs/README.md)
+For installation and usage instructions, please read the full documentation on the public repository at [GitHub](https://github.com/aphyt/omron)

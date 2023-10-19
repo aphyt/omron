@@ -5,6 +5,7 @@ __email__ = "jr@aphyt.com"
 
 import asyncio
 import ftplib
+import os.path
 import socket
 import errno
 import time
@@ -26,13 +27,16 @@ class F4TCPSerial:
     def __init__(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.camera_name = None
+        self.connected_host = None
         self.ftp_job_location = '/sd0:0/Jobs/Job1'
 
     def connect(self, host: str, port: int = 49211):
         self.socket.connect((host, port))
+        self.connected_host = host
         self.socket.setblocking(False)
 
     def close(self):
+        self.connected_host = None
         self.socket.close()
 
     def get_camera_name(self):
@@ -365,33 +369,42 @@ class F4TCPSerial:
                     next_slot = index + 1
         return next_slot
 
-    def transfer_running_job_from_camera(self, host: str, username: str = 'target', password: str = 'password'):
+    def transfer_running_job_from_camera(self,
+                                         username: str = 'target',
+                                         password: str = 'password',
+                                         path: str = None):
         available_slot = self.get_next_available_job_slot()
         current_time = datetime.now()
         current_time = current_time.strftime('%Y-%m-%dT%H-%M-%S')
         common_name = f'{current_time}_{self.get_camera_name()}'
         self.job_save_as(common_name, available_slot)
-        self.transfer_job_from_camera(available_slot, host, username, password)
+        self.transfer_job_from_camera(available_slot, username, password, path)
         self.job_delete_slot(available_slot)
 
-    def transfer_job_from_camera(
-            self, slot_number: int, host: str, username: str = 'target', password: str = 'password'):
+    def transfer_job_from_camera(self, slot_number: int,
+                                 username: str = 'target',
+                                 password: str = 'password',
+                                 path: str = None):
         available_slot = self.get_next_available_job_slot()
         avp_name = self.job_info(str(slot_number)).rsplit('=')[1]
         ftp_save_name = f'slot{slot_number}_{avp_name}'
         # Create an FTP to retrieve AVP
-        ftp_client = FTP(host, username, password)
+        ftp_client = FTP(self.connected_host, username, password)
         # Change to the directory where the saved AVP is stored
         ftp_client.cwd(self.ftp_job_location)
         # Retrieve file to the local machine
+        if path is None:
+            avp_name = os.path.join(os.getcwd(), avp_name)
+        else:
+            avp_name = os.path.join(path, avp_name)
         with open(avp_name, 'wb') as fp:
             ftp_client.retrbinary(f'RETR {ftp_save_name}', fp.write)
         self.job_delete_slot(available_slot)
 
     def transfer_job_to_camera(self, job_avp: str, slot_number: int,
-                               host: str, username: str = 'target', password: str = 'password'):
+                               username: str = 'target', password: str = 'password'):
         ftp_save_name = f'slot{slot_number}_{job_avp}'
-        ftp_client = FTP(host, username, password)
+        ftp_client = FTP(self.connected_host, username, password)
         # Change to the directory where the saved AVP is stored
         ftp_client.cwd(self.ftp_job_location)
         # Retrieve file to the local machine
