@@ -18,4 +18,4 @@ The package is available on [PyPi](https://pypi.org/project/omron/) for easy ins
 - Retrieve Help and Info from Camera 
 
 ## Documentation
-For installation and usage instructions, please read the full documentation on the public repository at [GitHub](https://github.com/aphyt/omron)
+For installation and usage instructions, please read the full [documentation](https://github.com/aphyt/omron/tree/master/docs) on the public repository at [GitHub](https://github.com/aphyt/omron)
